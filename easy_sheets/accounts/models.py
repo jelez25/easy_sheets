@@ -1,23 +1,15 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.contrib.auth.models import User
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 
-def custom_upload_to(instance, filename):
-    old_instance = Profile.objects.get(pk=instance.pk)
-    old_instance.avatar.delete()
-    return 'profiles/' + filename
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = [
+        ('teacher', 'Teacher'),
+        ('student', 'Student'),
+    ]
+    avatar = models.ImageField(upload_to='profiles/', null=True, blank=True)  # Profile picture
+    email = models.EmailField(unique=True)
+    birth_date = models.DateField(null=True, blank=True)  # Birth date
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='student')  # Role field
 
-# Create your models here.
-class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to=custom_upload_to, null=True, blank=True)
-    birth_date = models.DateField(null=True, blank=True)
-
-    class Meta:
-        ordering = ['user__username']
-
-@receiver(post_save, sender=User)
-def ensure_profile_exists(sender, instance, **kwargs):
-    if kwargs.get('created', False):
-        Profile.objects.get_or_create(user=instance)
+    def __str__(self):
+         return f"{self.username} ({self.role})"

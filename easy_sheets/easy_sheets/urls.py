@@ -17,6 +17,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+from django.conf import settings
+from django.conf.urls.static import static
+from easy_sheets.views import home_page
+from accounts.views import SignUpView, ProfileView
+from django.contrib.auth.views import LogoutView, LoginView
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('', home_page, name='home'),
+    path('register/', SignUpView.as_view(), name='register'),
+    path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+    path('profile/', ProfileView.as_view(), name='profile'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

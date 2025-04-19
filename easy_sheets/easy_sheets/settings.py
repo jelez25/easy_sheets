@@ -55,7 +55,7 @@ ROOT_URLCONF = 'easy_sheets.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'easy_sheets' / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -122,6 +122,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+
+# Custom User Model
+AUTH_USER_MODEL = 'accounts.CustomUser'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/profile/'
 # Media Files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
