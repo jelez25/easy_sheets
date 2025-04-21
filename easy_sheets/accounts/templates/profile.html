@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
 Profile
@@ -7,7 +8,24 @@ Profile
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center">Profile</h1>
-    <div class="card mx-auto" style="max-width: 500px;">
+    <div class="card mx-auto d-flex flex-row align-items-center" style="max-width: 500px;">
+        <!-- Profile Picture -->
+        <div class="p-3">
+            {% if user.avatar %}
+                <img 
+                    src="{{ user.avatar.url }}" 
+                    alt="Profile Picture" 
+                    class="img-thumbnail" 
+                    style="width: 150px; height: 150px; object-fit: cover;">
+            {% else %}
+                <img 
+                    src="{% static 'accounts/images/blank-profile-picture.png' %}" 
+                    alt="Default Profile Picture" 
+                    class="img-thumbnail" 
+                    style="width: 150px; height: 150px; object-fit: cover;">
+            {% endif %}
+        </div>
+        <!-- User Information -->
         <div class="card-body">
             <h5 class="card-title">User Information</h5>
             <p class="card-text">
@@ -19,6 +37,10 @@ Profile
                 <p class="card-text"><strong>Role:</strong> {{ user.get_role_display }}</p>
             {% endif %}
         </div>
+    </div>
+    <!-- Edit Profile Button -->
+    <div class="text-center mt-4">
+        <a href="{% url 'profile_form' %}" class="btn btn-primary">Editar Perfil</a>
     </div>
 </div>
 {% endblock %}

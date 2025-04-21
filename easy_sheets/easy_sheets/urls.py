@@ -20,7 +20,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from easy_sheets.views import home_page
-from accounts.views import SignUpView, ProfileView
+from accounts.views import SignUpView, ProfileView, ProfileUpdate
 from django.contrib.auth.views import LogoutView, LoginView
 
 urlpatterns = [
@@ -30,6 +30,7 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(), name='logout'),
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
     path('profile/', ProfileView.as_view(), name='profile'),
+    path('profile/edit/', ProfileUpdate.as_view(), name='profile_form')
 ]
 
 
