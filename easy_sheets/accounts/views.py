@@ -1,4 +1,4 @@
-from .forms import CustomUserCreationForm, ProfileUpdateForm
+from .forms import CustomUserCreationForm, ProfileUpdateForm, EmailForm
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 from django.views.generic import TemplateView
@@ -8,8 +8,9 @@ from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from .models import CustomUser
-
-
+from django import forms
+from django.contrib.auth.views import PasswordChangeView
+from django.contrib import messages
 
 # Create your views here.
 class SignUpView(CreateView):
@@ -51,11 +52,32 @@ class ProfileUpdate(UpdateView):
         return super().form_invalid(form)
 
     def form_valid(self, form):
-        # Depuración: Verifica si el archivo está en la solicitud
-        avatar = self.request.FILES.get('avatar')
-        print(f"Archivo recibido: {avatar}")  # Depuración
         instance = form.save(commit=False)
-        print(f"Avatar antes de guardar: {instance.avatar}")  # Depuración
         instance.save()
-        print(f"Avatar después de guardar: {instance.avatar}")  # Depuración
+        return super().form_valid(form)
+
+@method_decorator(login_required, name='dispatch')
+class EmailUpdate(UpdateView):
+    form_class = EmailForm
+    success_url = reverse_lazy('profile')
+    template_name = 'profile_email_form.html'
+
+    def get_object(self):
+        # recuperar el objeto que se va editar
+        return self.request.user
+
+    def get_form(self, form_class=None):
+        form = super(EmailUpdate, self).get_form()
+        # Modificar en tiempo real
+        form.fields['email'].widget = forms.EmailInput(
+            attrs={'class':'form-control mb-2', 'placeholder':'Email'})
+        return form
+
+@method_decorator(login_required, name='dispatch')
+class CustomPasswordChangeView(PasswordChangeView):
+    template_name = 'password_change_form.html'
+    success_url = reverse_lazy('profile')  # Redirect to the profile page after a successful password change
+
+    def form_valid(self, form):
+        messages.success(self.request, "Tú Contraseña ha sido cambiada con éxito.")
         return super().form_valid(form)

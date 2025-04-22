@@ -28,4 +28,16 @@ class ProfileUpdateForm(forms.ModelForm):
         model = CustomUser
         fields = ['avatar']
 
-    
+class EmailForm(forms.ModelForm):
+    email = forms.EmailField(required=True, help_text="Requerido. 254 carácteres como máximo y debe ser válido.")
+
+    class Meta:
+        model = CustomUser
+        fields = ['email']
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if 'email' in self.changed_data:
+            if CustomUser.objects.filter(email=email).exists():
+                raise forms.ValidationError("El email ya está registrado, prueba con otro.")
+        return email
