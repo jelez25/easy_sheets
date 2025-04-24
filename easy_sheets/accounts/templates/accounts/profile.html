@@ -42,5 +42,14 @@ Profile
     <div class="text-center mt-4">
         <a href="{% url 'profile_form' %}" class="btn btn-primary">Editar Perfil</a>
     </div>
+    <!-- Create Sheets Button (Visible only for teachers) -->
+    {% if user.role == 'teacher' %}
+    <div class="text-center mt-3">
+        <a href="{% url 'create_sheet' %}" class="btn btn-success">Crear Hoja Interactiva</a>
+    </div>
+    <div class="text-center mt-3">
+        <a href="{% url 'teacher_sheets' %}" class="btn btn-info">Ver Mis Hojas</a>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

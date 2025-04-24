@@ -15,7 +15,7 @@ from django.contrib import messages
 # Create your views here.
 class SignUpView(CreateView):
     form_class = CustomUserCreationForm
-    template_name = 'register.html'
+    template_name = 'accounts/register.html'
 
     def get_success_url(self):
         return reverse_lazy('login') + '?register'
@@ -30,7 +30,7 @@ class SignUpView(CreateView):
 
 
 class ProfileView(LoginRequiredMixin, TemplateView):
-    template_name = 'profile.html'
+    template_name = 'accounts/profile.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -41,7 +41,7 @@ class ProfileView(LoginRequiredMixin, TemplateView):
 class ProfileUpdate(UpdateView):
     form_class = ProfileUpdateForm
     success_url = reverse_lazy('profile')
-    template_name = 'profile_form.html'
+    template_name = 'accounts/profile_form.html'
 
     def get_object(self):
         return self.request.user
@@ -60,7 +60,7 @@ class ProfileUpdate(UpdateView):
 class EmailUpdate(UpdateView):
     form_class = EmailForm
     success_url = reverse_lazy('profile')
-    template_name = 'profile_email_form.html'
+    template_name = 'accounts/profile_email_form.html'
 
     def get_object(self):
         # recuperar el objeto que se va editar
@@ -75,9 +75,9 @@ class EmailUpdate(UpdateView):
 
 @method_decorator(login_required, name='dispatch')
 class CustomPasswordChangeView(PasswordChangeView):
-    template_name = 'password_change_form.html'
+    template_name = 'accounts/password_change_form.html'
     success_url = reverse_lazy('profile')  # Redirect to the profile page after a successful password change
 
     def form_valid(self, form):
-        messages.success(self.request, "Tú Contraseña ha sido cambiada con éxito.")
+        messages.success(self.request, "Tu Contraseña ha sido cambiada con éxito.")
         return super().form_valid(form)

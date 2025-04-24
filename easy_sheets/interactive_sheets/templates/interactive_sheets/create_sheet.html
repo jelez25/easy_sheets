@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Crear Hoja Interactiva
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Crear Hoja Interactiva</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="mb-3">
+            <label for="id_subject" class="form-label">{{ form.subject.label }}</label>
+            {{ form.subject }}
+            {{ form.subject.errors }}
+        </div>
+        <div class="mb-3">
+            <label for="id_statement" class="form-label">{{ form.statement.label }}</label>
+            {{ form.statement }}
+            {{ form.statement.errors }}
+        </div>
+        <div class="mb-3">
+            <label for="id_base_image" class="form-label">{{ form.base_image.label }}</label>
+            {{ form.base_image }}
+            {{ form.base_image.errors }}
+        </div>
+        <div class="mb-3 form-check">
+            {{ form.is_public }}
+            <label for="id_is_public" class="form-check-label">{{ form.is_public.label }}</label>
+            {{ form.is_public.errors }}
+        </div>
+        <div class="mb-3">
+            <label for="id_expiration_date" class="form-label">{{ form.expiration_date.label }}</label>
+            {{ form.expiration_date }}
+            {{ form.expiration_date.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary">Crear Hoja</button>
+    </form>
+</div>
+{% endblock %}

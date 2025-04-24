@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Sheet Details
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ sheet.subject }}</h1>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Details</h5>
+            <p><strong>Subject:</strong> {{ sheet.subject }}</p>
+            <p><strong>Statement:</strong> {{ sheet.statement }}</p>
+            <p><strong>Expiration Date:</strong> {{ sheet.expiration_date }}</p>
+            <p><strong>Status:</strong> {{ sheet.get_status_display }}</p>
+            <p><strong>Public:</strong> {{ sheet.is_public|yesno:"Yes,No" }}</p>
+            {% if sheet.base_image %}
+                <p><strong>Base Image:</strong></p>
+                <img src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">
+            {% endif %}
+            {% if sheet.grade %}
+                <p><strong>Grade:</strong> {{ sheet.grade }}</p>
+            {% endif %}
+            {% if sheet.comment %}
+                <p><strong>Comment:</strong> {{ sheet.comment }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="mt-4">
+        <a href="{% url 'teacher_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
+        <a href="#" class="btn btn-warning">Edit</a>
+    </div>
+</div>
+{% endblock %}

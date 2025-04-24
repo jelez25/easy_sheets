@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}
+My Sheets
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">My Sheets</h1>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover mt-4">
+            <thead class="table-dark">
+                <tr>
+                    <th>Subject</th>
+                    <th>Expiration Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sheet in sheets %}
+                    <tr>
+                        <td>{{ sheet.subject }}</td>
+                        <td>{{ sheet.expiration_date }}</td>
+                        <td>{{ sheet.get_status_display }}</td>
+                        <td>
+                            <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-primary btn-sm">View</a>
+                            <a href="#" class="btn btn-warning btn-sm">Edit</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No sheets found.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
