@@ -1,9 +1,13 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}
 Sheet Details
 {% endblock %}
-
+{% block extra_css %}
+<!-- CSS específico -->
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/sheet_detail.css' %}">
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/interactive_sheet.css' %}">
+{% endblock %}
 {% block content %}
 <div class="container mt-5">
     <h1 class="text-center">{{ sheet.subject }}</h1>
@@ -15,16 +19,13 @@ Sheet Details
             <p><strong>Expiration Date:</strong> {{ sheet.expiration_date }}</p>
             <p><strong>Status:</strong> {{ sheet.get_status_display }}</p>
             <p><strong>Public:</strong> {{ sheet.is_public|yesno:"Yes,No" }}</p>
-            {% if sheet.base_image %}
-                <p><strong>Base Image:</strong></p>
-                <img src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">
-            {% endif %}
-            {% if sheet.grade %}
-                <p><strong>Grade:</strong> {{ sheet.grade }}</p>
-            {% endif %}
-            {% if sheet.comment %}
-                <p><strong>Comment:</strong> {{ sheet.comment }}</p>
-            {% endif %}
+            <div class="interactive-area-container">
+                <div id="interactive-area" class="interactive-area" data-sheet-id="{{ sheet.id }}">
+                    {% if sheet.base_image %}
+                        <img id="uploaded-image" src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">
+                    {% endif %}
+                </div>
+            </div>
         </div>
     </div>
     <div class="mt-4">
@@ -32,4 +33,8 @@ Sheet Details
         <a href="#" class="btn btn-warning">Edit</a>
     </div>
 </div>
+
+{% endblock %}
+{% block extra_js %}
+<script src="{% static 'interactive_sheets/js/sheet_detail.js' %}"></script>
 {% endblock %}

@@ -1,15 +1,22 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
-Crear Hoja Interactiva
+Crear Ficha Interactiva
+{% endblock %}
+
+{% block extra_css %}
+<!-- CSS específico -->
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/interactive_sheet.css' %}">
 {% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Crear Hoja Interactiva</h1>
-    <form method="post" enctype="multipart/form-data">
+    <h1 class="text-center">Crear Ficha Interactiva</h1>
+    <form method="post" enctype="multipart/form-data" id="interactive-form">
         {% csrf_token %}
         {{ form.non_field_errors }}
+        <input type="hidden" name="interactive_options" id="interactive-options">
         <div class="mb-3">
             <label for="id_subject" class="form-label">{{ form.subject.label }}</label>
             {{ form.subject }}
@@ -35,7 +42,31 @@ Crear Hoja Interactiva
             {{ form.expiration_date }}
             {{ form.expiration_date.errors }}
         </div>
-        <button type="submit" class="btn btn-primary">Crear Hoja</button>
+
+        <!-- Interactive Options -->
+        <div class="mb-3">
+            <h3>Opciones Interactivas</h3>
+            <div class="btn-group mb-3">
+                <button type="button" class="btn btn-primary" id="add-text-box">Cuadro de Texto</button>
+                <button type="button" class="btn btn-secondary" id="add-union">Unión</button>
+                <button type="button" class="btn btn-success" id="add-check">Check</button>
+                <button type="button" class="btn btn-info" id="add-select">Dropdown</button>
+                <button type="button" class="btn btn-warning" id="add-draggable">Elemento Arrastrable</button>
+            </div>
+        </div>
+
+        <!-- Image Preview and Interactive Area -->
+        <div class="interactive-area-container">
+            <div id="interactive-area" class="interactive-area">
+                <img id="uploaded-image" src="#" alt="Imagen Base" class="img-fluid" style="display: none;">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Crear Ficha</button>
     </form>
 </div>
+{% endblock %}
+{% block extra_js %}
+<!-- JavaScript específico -->
+<script src="{% static 'interactive_sheets/js/interactive_sheet.js' %}"></script>
 {% endblock %}

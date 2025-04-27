@@ -24,7 +24,7 @@ class InteractiveSheet(models.Model):
         default='pending'
     )  # Estado
     expiration_date = models.DateTimeField()  # Fecha de expiración
-    
+    interactive_options = models.TextField(null=True, blank=True)
     grade = models.DecimalField(
         max_digits=5, 
         decimal_places=2, 

@@ -1,10 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.views.generic.edit import CreateView, UpdateView
 from .forms import InteractiveSheetForm
 from .models import InteractiveSheet
 from django.views.generic import ListView, DetailView
+import json
 # Create your views here.
 
 class CreateSheetView(LoginRequiredMixin, CreateView):
@@ -38,3 +39,17 @@ class SheetEditView(LoginRequiredMixin, UpdateView):
     fields = ['subject', 'statement', 'base_image', 'is_public', 'expiration_date', 'status']
     template_name = 'interactive_sheets/sheet_edit.html'
     success_url = '/sheets/my-sheets/'
+
+def interactive_options_api(request, sheet_id):
+    """
+    Endpoint para obtener los datos interactivos de una ficha.
+    """
+    sheet = get_object_or_404(InteractiveSheet, id=sheet_id)
+    
+    # Convertir el campo interactive_options de cadena a JSON
+    try:
+        interactive_options = json.loads(sheet.interactive_options) if sheet.interactive_options else []
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'El campo interactive_options contiene datos no válidos.'}, status=400)
+
+    return JsonResponse(interactive_options, safe=False)

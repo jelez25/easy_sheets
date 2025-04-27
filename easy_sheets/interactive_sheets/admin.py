@@ -12,6 +12,10 @@ class InteractiveSheetAdmin(admin.ModelAdmin):
         (None, {
             'fields': ('subject', 'statement', 'base_image', 'is_public', 'expiration_date', 'status', 'creator')
         }),
+        ('Interactive Options', {
+            'classes': ('collapse',),
+            'fields': ('interactive_options',),  # Add interactive_data here
+        }),
         ('Advanced options', {
             'classes': ('collapse',),
             'fields': ('grade', 'comment'),
