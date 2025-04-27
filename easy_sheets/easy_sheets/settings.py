@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'interactive_sheets'
+    'interactive_sheets',
+    'classrooms',
 ]
 
 MIDDLEWARE = [

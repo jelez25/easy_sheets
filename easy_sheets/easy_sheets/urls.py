@@ -31,6 +31,7 @@ urlpatterns = [
     path('login/', LoginView.as_view(template_name='accounts/login.html'), name='login'),
     path('profile/', include('accounts.urls')),
     path('sheets/', include('interactive_sheets.urls')),
+    path('classrooms/', include('classrooms.urls')),  # Incluir las rutas de classrooms
 ]
 
 

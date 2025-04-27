@@ -1,0 +1,50 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\classrooms\templates\classrooms\classroom_detail.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ classroom.name }} ({{ classroom.class_code }})</h2>
+    <p><strong>Teacher:</strong> {{ classroom.teacher }}</p>
+    <p><strong>Created At:</strong> {{ classroom.created_at }}</p>
+    <p><strong>Students:</strong></p>
+    <ul class="list-group">
+        {% for student in classroom.students.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ student.name }} {{ student.surname_1 }}{% if student.surname_2 %} {{ student.surname_2 }}{% endif %}
+                <form method="post" action="{% url 'remove_student' classroom.id student.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                </form>
+            </li>
+        {% empty %}
+            <p>No students assigned to this class.</p>
+        {% endfor %}
+    </ul>
+    <h3 class="mt-4">Add Students</h3>
+    {% if available_students %}
+        <form method="post" action="{% url 'add_student' classroom.id %}">
+            {% csrf_token %}
+            <select name="students" class="form-control">
+                {% for user in available_students %}
+                    <option value="{{ user.id }}">{{ user.name }} {{ user.surname_1 }}{% if user.surname_2 %} {{ user.surname_2 }}{% endif %}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary mt-2">Add Student</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning mt-3" role="alert">
+            No es posible añadir más alumnos.
+        </div>
+        <form>
+            <select name="students" class="form-control" disabled>
+                <option>No hay alumnos disponibles</option>
+            </select>
+            <button type="submit" class="btn btn-primary mt-2" disabled>Añadir Alumno</button>
+        </form>
+    {% endif %}
+    <form method="post" action="{% url 'delete_classroom' classroom.id %}" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Class</button>
+    </form>
+</div>
+{% endblock %}

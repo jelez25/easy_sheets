@@ -15,6 +15,7 @@ class CustomUser(AbstractUser):
     name = models.CharField(max_length=150)  # First name
     surname_1 = models.CharField(max_length=150)  # First surname
     surname_2 = models.CharField(max_length=150, blank=True)  # Second surname
+    school = models.CharField(max_length=255, default='test_school')
 
     def __str__(self):
         return f"{self.username} ({self.role})"

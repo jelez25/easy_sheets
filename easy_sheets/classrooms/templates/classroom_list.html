@@ -1,0 +1,19 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\classrooms\templates\classrooms\classroom_list.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>My Classes</h2>
+    <ul class="list-group mt-3">
+        {% for classroom in classrooms %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ classroom.name }} ({{ classroom.class_code }})
+                <a href="{% url 'classroom_detail' classroom.id %}" class="btn btn-primary btn-sm">View Details</a>
+            </li>
+        {% empty %}
+            <p>No classes found.</p>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'create_classroom' %}" class="btn btn-success mt-3">Create New Class</a>
+</div>
+{% endblock %}
