@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
 from .models import Classroom
 from accounts.models import CustomUser
+from interactive_sheets.models import InteractiveSheet
 from .forms import ClassroomForm
 
 # Create your views here.
@@ -52,12 +53,15 @@ class ClassroomDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         classroom = self.get_object()
-        # Filtrar estudiantes disponibles: del mismo colegio y que no están en la clase
+        # Filtrar estudiantes disponibles
         available_students = CustomUser.objects.filter(
             role='student',
             school=self.request.user.school
-        ).exclude(enrolled_classrooms=classroom)  # Usar el related_name correcto
+        ).exclude(enrolled_classrooms=classroom)
+        # Filtrar fichas disponibles
+        available_sheets = InteractiveSheet.objects.exclude(classrooms=classroom)
         context['available_students'] = available_students
+        context['available_sheets'] = available_sheets
         return context
 
 @login_required
@@ -99,3 +103,31 @@ def delete_classroom(request, pk):
     classroom = get_object_or_404(Classroom, pk=pk)
     classroom.delete()
     return redirect('classroom_list')
+
+@login_required
+def assign_sheet(request, pk):
+    classroom = get_object_or_404(Classroom, pk=pk)
+
+    if request.method == 'POST':
+        sheet_id = request.POST.get('sheets')
+        if sheet_id:
+            sheet = get_object_or_404(InteractiveSheet, pk=sheet_id)
+            classroom.sheets.add(sheet)
+            return redirect('classroom_detail', pk=classroom.pk)
+
+    return redirect('classroom_detail', pk=classroom.pk)
+
+@login_required
+def remove_sheet(request, pk, sheet_id):
+    # Obtener la clase y la ficha
+    classroom = get_object_or_404(Classroom, pk=pk)
+    sheet = get_object_or_404(InteractiveSheet, pk=sheet_id)
+
+    # Verificar si el método es POST
+    if request.method == 'POST':
+        # Eliminar la ficha de la clase
+        classroom.sheets.remove(sheet)
+        return redirect('classroom_detail', pk=classroom.pk)
+
+    # Redirigir a la página de detalles de la clase si no es POST
+    return redirect('classroom_detail', pk=classroom.pk)

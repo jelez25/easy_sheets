@@ -20,28 +20,77 @@
             <p>No students assigned to this class.</p>
         {% endfor %}
     </ul>
+
     <h3 class="mt-4">Add Students</h3>
     {% if available_students %}
         <form method="post" action="{% url 'add_student' classroom.id %}">
             {% csrf_token %}
             <select name="students" class="form-control">
                 {% for user in available_students %}
-                    <option value="{{ user.id }}">{{ user.name }} {{ user.surname_1 }}{% if user.surname_2 %} {{ user.surname_2 }}{% endif %}</option>
+                    <option value="{{ user.id }}">
+                        {{ user.name }} {{ user.surname_1 }}{% if user.surname_2 %} {{ user.surname_2 }}{% endif %}
+                    </option>
                 {% endfor %}
             </select>
             <button type="submit" class="btn btn-primary mt-2">Add Student</button>
         </form>
     {% else %}
         <div class="alert alert-warning mt-3" role="alert">
-            No es posible añadir más alumnos.
+            No hay alumnos disponibles para asignar.
         </div>
         <form>
             <select name="students" class="form-control" disabled>
                 <option>No hay alumnos disponibles</option>
             </select>
-            <button type="submit" class="btn btn-primary mt-2" disabled>Añadir Alumno</button>
+            <button type="submit" class="btn btn-primary mt-2" disabled>Add Student</button>
         </form>
     {% endif %}
+
+    <h3 class="mt-4">Assigned Interactive Sheets</h3>
+    <ul class="list-group">
+        {% for sheet in classroom.sheets.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ sheet.subject }}</strong> - {{ sheet.statement }}
+                </div>
+                <div>
+                    <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">View Detail</a>
+                    <form method="post" action="{% url 'remove_sheet' classroom.id sheet.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-sm">Remove</button>
+                    </form>
+                </div>
+            </li>
+        {% empty %}
+            <p>No interactive sheets assigned to this class.</p>
+        {% endfor %}
+    </ul>
+
+    <h3 class="mt-4">Assign Sheets</h3>
+    {% if available_sheets %}
+        <form method="post" action="{% url 'assign_sheet' classroom.id %}">
+            {% csrf_token %}
+            <select name="sheets" class="form-control">
+                {% for sheet in available_sheets %}
+                    <option value="{{ sheet.id }}">
+                        {{ sheet.subject }} - {{ sheet.statement }}
+                    </option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary mt-2">Assign Sheet</button>
+        </form>
+    {% else %}
+        <div class="alert alert-warning mt-3" role="alert">
+            No hay fichas disponibles para asignar.
+        </div>
+        <form>
+            <select name="sheets" class="form-control" disabled>
+                <option>No hay fichas disponibles</option>
+            </select>
+            <button type="submit" class="btn btn-primary mt-2" disabled>Assign Sheet</button>
+        </form>
+    {% endif %}
+
     <form method="post" action="{% url 'delete_classroom' classroom.id %}" class="mt-4">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Delete Class</button>
