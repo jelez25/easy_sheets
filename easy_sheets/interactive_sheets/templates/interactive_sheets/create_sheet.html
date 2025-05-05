@@ -43,7 +43,7 @@ Crear Ficha Interactiva
             {{ form.expiration_date.errors }}
         </div>
 
-        <!-- Interactive Options -->
+        <!-- Opciones Interactivas -->
         <div class="mb-3">
             <h3>Opciones Interactivas</h3>
             <div class="btn-group mb-3">
@@ -55,7 +55,7 @@ Crear Ficha Interactiva
             </div>
         </div>
 
-        <!-- Image Preview and Interactive Area -->
+        <!-- Área Interactiva -->
         <div class="interactive-area-container">
             <div id="interactive-area" class="interactive-area">
                 <img id="uploaded-image" src="#" alt="Imagen Base" class="img-fluid" style="display: none;">
@@ -66,6 +66,7 @@ Crear Ficha Interactiva
     </form>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <!-- JavaScript específico -->
 <script src="{% static 'interactive_sheets/js/interactive_sheet.js' %}"></script>

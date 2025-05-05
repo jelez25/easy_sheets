@@ -29,11 +29,15 @@ Sheet Details
         </div>
     </div>
     <div class="mt-4">
-        <a href="{% url 'teacher_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
-        <a href="#" class="btn btn-warning">Edit</a>
+        {% if user.role == 'teacher' %}
+            <a href="{% url 'teacher_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
+            <a href="#" class="btn btn-warning">Edit</a>
+        {% elif user.role == 'student' %}
+            <a href="{% url 'student_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
+        {% endif %}
+        
     </div>
 </div>
-
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'interactive_sheets/js/sheet_detail.js' %}"></script>

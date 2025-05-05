@@ -1,0 +1,20 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\interactive_sheets\templates\interactive_sheets\student_sheets.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Mis Hojas Interactivas</h1>
+    <ul class="list-group">
+        {% for sheet in sheets %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ sheet.subject }}</strong> - {{ sheet.statement }}
+                </div>
+                <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+            </li>
+        {% empty %}
+            <p>No tienes hojas asignadas.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

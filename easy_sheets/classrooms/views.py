@@ -1,8 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, ListView, DetailView
+from django.views import View
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseForbidden
 from .models import Classroom
 from accounts.models import CustomUser
 from interactive_sheets.models import InteractiveSheet
@@ -13,7 +15,7 @@ from .forms import ClassroomForm
 class ClassroomCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
     model = Classroom
     form_class = ClassroomForm
-    template_name = 'create_classroom.html'
+    template_name = 'classrooms/create_classroom.html'
     success_url = '/classrooms/'  # Cambia esta URL según tu proyecto
 
     def get_form_kwargs(self):
@@ -36,7 +38,7 @@ class ClassroomCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
 
 class ClassroomListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
     model = Classroom
-    template_name = 'classroom_list.html'
+    template_name = 'classrooms/classroom_list.html'
     context_object_name = 'classrooms'
 
     def get_queryset(self):
@@ -47,7 +49,7 @@ class ClassroomListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class ClassroomDetailView(LoginRequiredMixin, DetailView):
     model = Classroom
-    template_name = 'classroom_detail.html'
+    template_name = 'classrooms/classroom_detail.html'
     context_object_name = 'classroom'
 
     def get_context_data(self, **kwargs):
@@ -131,3 +133,40 @@ def remove_sheet(request, pk, sheet_id):
 
     # Redirigir a la página de detalles de la clase si no es POST
     return redirect('classroom_detail', pk=classroom.pk)
+
+class StudentClassroomView(LoginRequiredMixin, DetailView):
+    model = Classroom
+    template_name = 'classrooms/student_classroom.html'
+    context_object_name = 'classroom'
+
+    def get_object(self):
+        # Obtener la clase a la que el estudiante está asignado
+        try:
+            return Classroom.objects.get(students=self.request.user)
+        except Classroom.DoesNotExist:
+            return None
+
+    def get(self, request, *args, **kwargs):
+        classroom = self.get_object()
+        if classroom:
+            return super().get(request, *args, **kwargs)
+        else:
+            # Si el estudiante no está asignado a ninguna clase, redirigir a una página para unirse
+            return redirect('join_classroom')  # Cambia 'join_classroom' según tu configuración
+
+class JoinClassroomView(LoginRequiredMixin, View):
+    def post(self, request):
+        class_code = request.POST.get('class_code')
+        try:
+            # Filtrar la clase por código y colegio del estudiante
+            classroom = Classroom.objects.get(class_code=class_code, teacher__school=request.user.school)
+            classroom.students.add(request.user)
+            return HttpResponseRedirect(reverse('student_classroom'))
+        except Classroom.DoesNotExist:
+            # Mostrar un mensaje de error si la clase no existe o no pertenece al mismo colegio
+            return render(request, 'classrooms/join_classroom.html', {
+                'error': 'El código de clase no es válido o no pertenece a tu colegio.'
+            })
+
+    def get(self, request):
+        return render(request, 'classrooms/join_classroom.html')

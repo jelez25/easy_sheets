@@ -42,7 +42,7 @@ Profile
     <div class="text-center mt-4">
         <a href="{% url 'profile_form' %}" class="btn btn-primary">Editar Perfil</a>
     </div>
-    <!-- Create Sheets Button (Visible only for teachers) -->
+    <!-- Options for Teachers -->
     {% if user.role == 'teacher' %}
     <div class="text-center mt-3">
         <a href="{% url 'create_sheet' %}" class="btn btn-success">Crear Hoja Interactiva</a>
@@ -50,6 +50,13 @@ Profile
     <div class="text-center mt-3">
         <a href="{% url 'teacher_sheets' %}" class="btn btn-info">Ver Mis Hojas</a>
         <a href="{% url 'classroom_list' %}" class="btn btn-info btn-block mt-3">View My Classes</a>
+    </div>
+    {% endif %}
+    <!-- Options for Students -->
+    {% if user.role == 'student' %}
+    <div class="text-center mt-3">
+        <a href="{% url 'student_sheets' %}" class="btn btn-info">Ver Mis Hojas</a>
+        <a href="{% url 'student_classroom' %}" class="btn btn-info btn-block mt-3">Ver Mi Clase</a>
     </div>
     {% endif %}
 </div>

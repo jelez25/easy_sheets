@@ -1,0 +1,32 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\classrooms\templates\classrooms\student_classroom.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if classroom %}
+        <h1 class="text-center">Mi Clase</h1>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><strong>Nombre de la Clase:</strong> {{ classroom.name }}</h5>
+                <p class="card-text"><strong>Profesor:</strong> {{ classroom.teacher.name }}</p>
+                <p class="card-text"><strong>Código de Clase:</strong> {{ classroom.class_code }}</p>
+                <h5 class="mt-4">Compañeros:</h5>
+                <ul class="list-group">
+                    {% for student in classroom.students.all %}
+                        <li class="list-group-item">
+                            {{ student.name }} {{ student.surname_1 }}{% if student.surname_2 %} {{ student.surname_2 }}{% endif %}
+                        </li>
+                    {% empty %}
+                        <p>No hay compañeros en esta clase.</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% else %}
+        <h1 class="text-center">No estás asignado a ninguna clase</h1>
+        <div class="text-center mt-4">
+            <a href="{% url 'join_classroom' %}" class="btn btn-primary">Unirse a una Clase</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

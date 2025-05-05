@@ -1,0 +1,19 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\classrooms\templates\classrooms\join_classroom.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Unirse a una Clase</h1>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="class_code">Código de Clase</label>
+            <input type="text" name="class_code" id="class_code" class="form-control" required>
+        </div>
+        {% if error %}
+            <p class="text-danger">{{ error }}</p>
+        {% endif %}
+        <button type="submit" class="btn btn-primary mt-3">Unirse</button>
+    </form>
+</div>
+{% endblock %}

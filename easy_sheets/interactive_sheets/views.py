@@ -53,3 +53,11 @@ def interactive_options_api(request, sheet_id):
         return JsonResponse({'error': 'El campo interactive_options contiene datos no válidos.'}, status=400)
 
     return JsonResponse(interactive_options, safe=False)
+
+class StudentSheetsView(LoginRequiredMixin, ListView):
+    model = InteractiveSheet
+    template_name = 'interactive_sheets/student_sheets.html'
+    context_object_name = 'sheets'
+
+    def get_queryset(self):
+        return InteractiveSheet.objects.filter(classrooms__students=self.request.user)

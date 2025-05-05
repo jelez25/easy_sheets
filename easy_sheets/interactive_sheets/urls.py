@@ -6,4 +6,5 @@ urlpatterns = [
     path('my-sheets/', views.TeacherSheetsView.as_view(), name='teacher_sheets'),
     path('<int:pk>/', views.SheetDetailView.as_view(), name='sheet_detail'),
     path('api/sheet/<int:sheet_id>/interactive-options/', views.interactive_options_api, name='interactive_options_api'),
+    path('student-sheets/', views.StudentSheetsView.as_view(), name='student_sheets'),
 ]

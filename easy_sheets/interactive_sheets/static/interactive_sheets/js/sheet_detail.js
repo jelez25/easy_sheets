@@ -105,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function renderUnion(data) {
+        console.log('renderizando union');
         const container = document.createElement('div');
         container.className = 'union-container';
         container.style.top = `${data.y}px`;
