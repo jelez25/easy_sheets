@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const imageInput = document.getElementById('id_base_image');
     const uploadedImage = document.getElementById('uploaded-image');
     const interactiveArea = document.getElementById('interactive-area');
+    const interactiveAreaContainer = document.getElementById('interactive-area-container'); // Corregido getElementBy a getElementById
     const interactiveForm = document.getElementById('interactive-form');
     const interactiveDataInput = document.getElementById('interactive-options'); // Usar el input oculto existente
 
@@ -16,9 +17,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Ajustar el ancho de la imagen al ancho del área interactiva
                 uploadedImage.onload = function () {
-                    const areaWidth = interactiveArea.offsetWidth;
-                    uploadedImage.style.width = `${areaWidth}px`;
-                    uploadedImage.style.height = 'auto'; // Mantener la proporción
+                    // Guardar las proporciones originales de la imagen
+                    const imageRatio = this.naturalWidth / this.naturalHeight;
+                    
+                    // Ajustar la altura al área
+                    const areaHeight = interactiveArea.offsetHeight || 600;
+                    uploadedImage.style.height = `${areaHeight}px`;
+                    uploadedImage.style.width = 'auto'; // Mantener la proporción
+                    
+                    // Calcular el nuevo ancho basado en la proporción
+                    const newWidth = areaHeight * imageRatio;
+                    
+                    // Ajustar el ancho del área interactiva al ancho calculado de la imagen
+                    interactiveArea.style.width = `${newWidth}px`;
+                    
+                    // Ajustar también el ancho del contenedor para mantenerlo alineado
+                    if (interactiveAreaContainer) {
+                        interactiveAreaContainer.style.width = `${newWidth}px`;
+                        //interactiveAreaContainer.style.overflowX = 'auto'; // Permitir desplazamiento si es necesario
+                    }
+                    
+                    console.log(`Imagen ajustada: ${areaHeight}px alto, ${newWidth}px ancho`);
                 };
             };
             reader.readAsDataURL(file);
@@ -26,6 +45,15 @@ document.addEventListener('DOMContentLoaded', function () {
             // Si no hay archivo seleccionado, ocultar la imagen
             uploadedImage.src = '#';
             uploadedImage.style.display = 'none';
+            
+            // Restaurar el tamaño predeterminado del área interactiva
+            interactiveArea.style.width = '100%';
+            interactiveArea.style.height = '600px'; // Altura predeterminada
+            
+            // Restaurar también el contenedor
+            if (interactiveAreaContainer) {
+                interactiveAreaContainer.style.width = '100%';
+            }
         }
     });
 
@@ -90,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function () {
             element.style.borderRadius = '50%'; // Hacerlo circular
         } else if (type === 'Elemento Arrastrable') {
             // Crear el elemento arrastrable
-            console.log('Creando un elemento arrastrable');
             element = document.createElement('div');
             element.className = 'draggable-element';
             element.textContent = 'Elemento Arrastrable';
@@ -282,51 +309,66 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Antes de enviar el formulario, recopilar los datos de los elementos interactivos
     interactiveForm.addEventListener('submit', function (e) {
-        const interactiveElements = interactiveArea.querySelectorAll('.check-container, .dropdown-container, textarea, .draggable-container, .union-container');
+        // Seleccionar los contenedores, no los elementos internos directamente
+        const interactiveContainers = interactiveArea.querySelectorAll('.interactive-container');
         const interactiveData = [];
 
-        interactiveElements.forEach(element => {
-            const rect = element.getBoundingClientRect();
+        console.log(`Encontrados ${interactiveContainers.length} elementos interactivos`);
+
+        interactiveContainers.forEach(container => {
+            const rect = container.getBoundingClientRect();
             const parentRect = interactiveArea.getBoundingClientRect();
 
-            // Determinar el tipo de elemento
+            // Determinar el tipo de elemento basado en su contenido
             let type;
             let content = null;
+            
+            // Buscar elementos dentro del contenedor
+            const checkbox = container.querySelector('input[type="checkbox"]');
+            const textarea = container.querySelector('textarea');
+            const select = container.querySelector('select');
+            const draggable = container.querySelector('.draggable-element');
+            const unionPoint = container.querySelector('.union-point');
 
-            if (element.classList.contains('check-container')) {
+            if (checkbox) {
                 type = 'Check';
-                const checkbox = element.querySelector('input[type="checkbox"]');
-                content = checkbox.checked; // Guardar si el checkbox está marcado o no
-            } else if (element.classList.contains('dropdown-container')) {
-                type = 'Dropdown';
-                const select = element.querySelector('select');
-                content = Array.from(select.options).map(option => option.textContent); // Guardar las opciones del dropdown
-            } else if (element.tagName === 'TEXTAREA') {
+                content = checkbox.checked;
+            } else if (textarea) {
                 type = 'Cuadro de Texto';
-                content = element.value; // Guardar el contenido del cuadro de texto
-            } else if (element.classList.contains('draggable-container')) {
+                content = textarea.value;
+            } else if (select) {
+                type = 'Dropdown';
+                content = Array.from(select.options).map(option => option.textContent);
+            } else if (draggable) {
                 type = 'Elemento Arrastrable';
-                const draggableElement = element.querySelector('.draggable-element');
-                content = draggableElement.textContent; // Guardar el texto del elemento arrastrable
-            } else if (element.classList.contains('union-container')) {
-                type = 'union';
-                const line = element.querySelector('.union-line');
+                content = draggable.textContent;
+            } else if (unionPoint) {
+                type = 'Union Point';
+                // Para puntos de unión, guardar su posición relativa
                 content = {
-                    width: line.offsetWidth // Guardar el ancho de la línea de unión
+                    x: parseInt(container.style.left),
+                    y: parseInt(container.style.top)
                 };
             }
 
-            // Guardar los datos del elemento
-            interactiveData.push({
-                type: type,
-                x: rect.left - parentRect.left,
-                y: rect.top - parentRect.top,
-                width: rect.width,
-                height: rect.height,
-                content: content
-            });
+            // Solo guardar elementos con tipo identificado
+            if (type) {
+                interactiveData.push({
+                    type: type,
+                    x: rect.left - parentRect.left,
+                    y: rect.top - parentRect.top,
+                    width: rect.width,
+                    height: rect.height,
+                    content: content
+                });
+                
+                console.log(`Añadido elemento de tipo: ${type}`);
+            }
         });
 
+        // Depuración para ver los datos que se envían
+        console.log('Datos a enviar:', interactiveData);
+        
         // Almacenar los datos como JSON en el input oculto
         interactiveDataInput.value = JSON.stringify(interactiveData);
     });

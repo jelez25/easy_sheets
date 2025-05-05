@@ -1,0 +1,14 @@
+<!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\interactive_sheets\templates\interactive_sheets\no_permission.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+Acceso Denegado
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <h1 class="display-4 text-danger">Acceso Denegado</h1>
+    <p class="lead">No tienes permiso para acceder a esta página.</p>
+    <a href="{% url 'profile' %}" class="btn btn-primary mt-3">Volver al Perfil</a>
+</div>
+{% endblock %}

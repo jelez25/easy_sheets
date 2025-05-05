@@ -19,7 +19,18 @@ Sheet Details
             <p><strong>Expiration Date:</strong> {{ sheet.expiration_date }}</p>
             <p><strong>Status:</strong> {{ sheet.get_status_display }}</p>
             <p><strong>Public:</strong> {{ sheet.is_public|yesno:"Yes,No" }}</p>
-            <div class="interactive-area-container">
+            <div class="interactive-area-container" id="interactive-area-container">
+                {% if sheet.interactive_options %}
+                    <div id="interactive-options" class="interactive-options">
+                        {% for option in sheet.interactive_options.all %}
+                            <div class="option-item" data-option-id="{{ option.id }}">
+                                <p><strong>Type:</strong> {{ option.get_type_display }}</p>
+                                <p><strong>Position:</strong> ({{ option.position_x }}, {{ option.position_y }})</p>
+                                <p><strong>Size:</strong> ({{ option.width }}, {{ option.height }})</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
                 <div id="interactive-area" class="interactive-area" data-sheet-id="{{ sheet.id }}">
                     {% if sheet.base_image %}
                         <img id="uploaded-image" src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">

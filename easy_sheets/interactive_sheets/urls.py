@@ -3,8 +3,9 @@ from . import views
 
 urlpatterns = [
     path('create/', views.CreateSheetView.as_view(), name='create_sheet'),
-    path('my-sheets/', views.TeacherSheetsView.as_view(), name='teacher_sheets'),
+    path('teacher-sheets/', views.TeacherSheetsView.as_view(), name='teacher_sheets'),
     path('<int:pk>/', views.SheetDetailView.as_view(), name='sheet_detail'),
     path('api/sheet/<int:sheet_id>/interactive-options/', views.interactive_options_api, name='interactive_options_api'),
     path('student-sheets/', views.StudentSheetsView.as_view(), name='student_sheets'),
+    path('no-permission/', views.NoPermissionView.as_view(), name='no_permission'),
 ]
