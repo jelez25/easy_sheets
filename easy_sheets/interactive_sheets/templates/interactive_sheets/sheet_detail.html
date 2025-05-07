@@ -45,11 +45,42 @@ Sheet Details
             <a href="#" class="btn btn-warning">Edit</a>
         {% elif user.role == 'student' %}
             <a href="{% url 'student_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
+            <button id="submit-sheet-btn" class="btn btn-primary">Enviar Ficha</button>
         {% endif %}
-        
     </div>
+
+    <!-- Modal para confirmación de envío -->
+    <div class="modal fade" id="submitConfirmModal" tabindex="-1" aria-labelledby="submitConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="submitConfirmModalLabel">Confirmar envío</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ¿Estás seguro de enviar esta ficha? No podrás modificar tus respuestas después.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirm-submit">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulario oculto para enviar los datos -->
+    {% if user.role == 'student' %}
+    <form id="student-answers-form" method="post" action="{% url 'submit_sheet' sheet.id %}" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" name="student_answers" id="student-answers">
+    </form>
+    {% endif %}
 </div>
 {% endblock %}
 {% block extra_js %}
+{% if user.role == 'student' %}
+<script src="{% static 'interactive_sheets/js/solve_sheet.js' %}"></script>
+{% else %}
 <script src="{% static 'interactive_sheets/js/sheet_detail.js' %}"></script>
+{% endif %}
 {% endblock %}

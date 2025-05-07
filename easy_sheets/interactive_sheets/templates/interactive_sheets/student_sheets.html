@@ -1,5 +1,6 @@
 <!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\interactive_sheets\templates\interactive_sheets\student_sheets.html -->
 {% extends 'base.html' %}
+{% load submission_filters %}
 
 {% block content %}
 <div class="container mt-5">
@@ -9,8 +10,19 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 <div>
                     <strong>{{ sheet.subject }}</strong> - {{ sheet.statement }}
+                    <p class="mb-0"><small><strong>Estado:</strong> 
+                        {% with sheet|get_submission_status:user as submission_status %}
+                            {{ submission_status }}
+                        {% endwith %}
+                    </small></p>
                 </div>
-                <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+                {% with sheet|get_submission_status:user as submission_status %}
+                    {% if submission_status == 'pendiente' %}
+                        <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">Resolver</a>
+                    {% else %}
+                    <a href="#" class="btn btn-info btn-sm">Ver entrega</a>
+                    {% endif %}
+                {% endwith %}
             </li>
         {% empty %}
             <p>No tienes hojas asignadas.</p>

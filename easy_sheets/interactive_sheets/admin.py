@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import InteractiveSheet
+from .models import InteractiveSheet, SheetSubmission
 
 @admin.register(InteractiveSheet)
 class InteractiveSheetAdmin(admin.ModelAdmin):
@@ -27,3 +27,19 @@ class InteractiveSheetAdmin(admin.ModelAdmin):
         if not obj.creator:
             obj.creator = request.user
         super().save_model(request, obj, form, change)
+
+@admin.register(SheetSubmission)
+class SheetSubmissionAdmin(admin.ModelAdmin):
+    list_display = ('student', 'sheet', 'status','submission_date', 'score')  # Fields to display in the admin list view
+    list_filter = ('submission_date', 'score')  # Filters for the admin sidebar
+    search_fields = ('student__username', 'sheet__subject')  # Searchable fields
+    readonly_fields = ('submission_date',)  # Make the submission date read-only
+    fieldsets = (
+        (None, {
+            'fields': ('student', 'sheet', 'status','answers', 'submission_date')
+        }),
+        ('Feedback and Scoring', {
+            'classes': ('collapse',),
+            'fields': ('feedback', 'score'),
+        }),
+    )

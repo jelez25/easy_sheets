@@ -2,10 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import CreateView, ListView, DetailView
 from django.views import View
-from django.http import HttpResponseRedirect, HttpResponseForbidden, JsonResponse
-from django.urls import reverse, reverse_lazy
+from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.views.generic.edit import UpdateView
 from .models import Classroom
 from accounts.models import CustomUser
@@ -68,6 +67,25 @@ class ClassroomDetailView(LoginRequiredMixin, DetailView):
         context['available_sheets'] = available_sheets
         return context
 
+class ClassroomEditView(LoginRequiredMixin, DetailView):
+    model = Classroom
+    template_name = 'classrooms/edit_classroom.html'
+    context_object_name = 'classroom'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        classroom = self.get_object()
+        # Filtrar estudiantes disponibles
+        available_students = CustomUser.objects.filter(
+            role='student',
+            school=self.request.user.school
+        ).exclude(enrolled_classrooms=classroom)
+        # Filtrar fichas disponibles
+        available_sheets = InteractiveSheet.objects.exclude(classrooms=classroom)
+        context['available_students'] = available_students
+        context['available_sheets'] = available_sheets
+        return context
+
 @login_required
 def add_student(request, pk):
     # Verificar si el usuario es un profesor
@@ -83,8 +101,7 @@ def add_student(request, pk):
         selected_students_ids = request.POST.getlist('students')  # Obtener los IDs seleccionados
         selected_students = CustomUser.objects.filter(id__in=selected_students_ids, role='student', school=request.user.school)
         classroom.students.add(*selected_students)
-        messages.success(request, "Estudiantes añadidos correctamente.")  # Añadir mensaje de éxito
-        return redirect('edit_classroom', pk=classroom.pk)  # Redirigir después de procesar el formulario
+        return redirect('classroom_detail', pk=classroom.pk)  # Redirigir después de procesar el formulario
 
     return render(request, 'add_students.html', {'students': students, 'classroom': classroom})
 
@@ -97,7 +114,7 @@ def remove_student(request, pk, student_id):
     classroom = get_object_or_404(Classroom, pk=pk)
     student = get_object_or_404(CustomUser, pk=student_id)
     classroom.students.remove(student)
-    return redirect('edit_classroom', pk=pk)
+    return redirect('classroom_detail', pk=pk)
 
 @login_required
 def delete_classroom(request, pk):
@@ -133,9 +150,9 @@ def assign_sheet(request, pk):
             for student in classroom.students.all():
                 SheetSubmission.objects.create(student=student, sheet=sheet)
             
-            return redirect('edit_classroom', pk=classroom.pk)
+            return redirect('classroom_detail', pk=classroom.pk)
 
-    return redirect('edit_classroom', pk=classroom.pk)
+    return redirect('classroom_detail', pk=classroom.pk)
 
 @login_required
 def remove_sheet(request, pk, sheet_id):
@@ -151,10 +168,10 @@ def remove_sheet(request, pk, sheet_id):
         # Eliminar todos los SheetSubmission asociados a la ficha y a los estudiantes de la clase
         SheetSubmission.objects.filter(sheet=sheet, student__in=classroom.students.all()).delete()
 
-        return redirect('edit_classroom', pk=classroom.pk)
+        return redirect('classroom_detail', pk=classroom.pk)
 
     # Redirigir a la página de detalles de la clase si no es POST
-    return redirect('edit_classroom', pk=classroom.pk)
+    return redirect('classroom_detail', pk=classroom.pk)
 
 class StudentClassroomView(LoginRequiredMixin, DetailView):
     model = Classroom
@@ -192,22 +209,3 @@ class JoinClassroomView(LoginRequiredMixin, View):
 
     def get(self, request):
         return render(request, 'classrooms/join_classroom.html')
-
-class  ClassroomEditView(LoginRequiredMixin, DetailView):
-    model = Classroom
-    template_name = 'classrooms/edit_classroom.html'
-    context_object_name = 'classroom'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        classroom = self.get_object()
-        # Filtrar estudiantes disponibles
-        available_students = CustomUser.objects.filter(
-            role='student',
-            school=self.request.user.school
-        ).exclude(enrolled_classrooms=classroom)
-        # Filtrar fichas disponibles
-        available_sheets = InteractiveSheet.objects.exclude(classrooms=classroom)
-        context['available_students'] = available_students
-        context['available_sheets'] = available_sheets
-        return context

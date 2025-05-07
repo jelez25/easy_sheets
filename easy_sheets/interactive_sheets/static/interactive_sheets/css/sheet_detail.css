@@ -1,13 +1,19 @@
+/* Estilos para elementos interactivos */
 .interactive-area-container {
     position: relative;
     width: 100%;
+    overflow: auto;
+    margin-bottom: 20px;
     height: 100%;
-    overflow: hidden;
 }
 
 .interactive-area {
     position: relative;
+    min-height: 400px;
     width: 100%;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+    margin: 0 auto;
     height: 100%;
 }
 
@@ -18,6 +24,7 @@
     width: auto; /* Mantener la proporción */
     height: 100%; /* Ajustar a la altura del área interactiva */
     object-fit: contain;
+    z-index: 0;
 }
 
 .interactive-element {
@@ -29,20 +36,26 @@
     z-index: 2;
 }
 
+.interactive-container {
+    z-index: 10;
+}
+
 .check-container {
     display: flex;
     align-items: center;
+    justify-content: center;
     position: absolute;
     cursor: pointer;
 }
 
 .dropdown-container {
     position: absolute;
-    z-index: 2;
+    z-index: 15;
 }
 
 .draggable-container {
     position: absolute;
+    cursor: grab;
     z-index: 2;
 }
 
@@ -58,5 +71,31 @@
     height: 20px;
     background-color: black;
     border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.connection-line {
+    position: absolute;
+    height: 2px;
+    background-color: black;
+    transform-origin: 0 0;
+    z-index: 5;
+}
+
+.delete-connection-btn {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: white;
+    border: 1px solid red;
+    color: red;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 6;
 }
 

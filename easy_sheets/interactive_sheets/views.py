@@ -3,9 +3,16 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.http import HttpResponseForbidden, JsonResponse
 from django.views.generic.edit import CreateView, UpdateView
 from .forms import InteractiveSheetForm
-from .models import InteractiveSheet
+from .models import InteractiveSheet, SheetSubmission
 from django.views.generic import ListView, DetailView, TemplateView
+from django.views.decorators.csrf import csrf_exempt
+from accounts.models import CustomUser
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 import json
+from django.views import View
+from django.urls import reverse
+import traceback
 # Create your views here.
 
 class CreateSheetView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -86,3 +93,74 @@ class StudentSheetsView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 class NoPermissionView(TemplateView):
     template_name = 'interactive_sheets/no_permission.html'
+
+@login_required
+def submit_sheet(request, sheet_id):
+    if request.method == 'POST':
+        try:
+            sheet = get_object_or_404(InteractiveSheet, id=sheet_id)
+            student = request.user
+            if student.role != 'student':
+                return JsonResponse({'success': False, 'message': 'No tienes permiso para enviar esta ficha.'}, status=403)
+
+            # Obtener las respuestas del estudiante directamente como JSON
+            student_answers = request.POST.get('student_answers', '{}')
+            
+            # Ya no es necesario hacer json.dumps() aquí, pues ya es una cadena JSON
+            
+            # Crear o actualizar la entrega
+            submission, created = SheetSubmission.objects.update_or_create(
+                student=student,
+                sheet=sheet,
+                defaults={
+                    'answers': student_answers,  # Guardar directamente la cadena JSON
+                    'status': 'enviada'
+                }
+            )
+            
+            # Devolver respuesta JSON exitosa
+            return JsonResponse({
+                'success': True, 
+                'message': 'Ficha enviada correctamente.',
+                'redirect_url': reverse('student_sheets')
+            })
+            
+        except Exception as e:
+            print(f"Error en submit_sheet: {str(e)}")
+            return JsonResponse({
+                'success': False, 
+                'message': f'Error al enviar la ficha: {str(e)}'
+            }, status=500)
+            
+    return JsonResponse({'success': False, 'message': 'Método no permitido.'}, status=405)
+
+class SheetSubmissionsView(LoginRequiredMixin, UserPassesTestMixin, View):
+    template_name = 'interactive_sheets/sheet_submissions.html'
+
+    def get(self, request, sheet_id):
+        sheet = get_object_or_404(InteractiveSheet, id=sheet_id)
+        classroom = sheet.classrooms.first()  # Obtener la primera clase a la que está asignada la ficha
+        if not classroom:
+            return HttpResponseForbidden("Esta ficha no está asignada a ninguna clase.")
+
+        students_data = []
+        for student in classroom.students.all():
+            try:
+                submission = SheetSubmission.objects.get(sheet=sheet, student=student)
+                status = submission.get_status_display()  # Obtener el valor legible del estado
+            except SheetSubmission.DoesNotExist:
+                status = 'Pendiente'  # Si no hay entrega, el estado es pendiente
+
+            students_data.append({
+                'student': student,
+                'status': status,
+            })
+
+        context = {
+            'sheet': sheet,
+            'students_data': students_data,
+        }
+        return render(request, self.template_name, context)
+
+    def test_func(self):
+        return self.request.user.role == 'teacher'

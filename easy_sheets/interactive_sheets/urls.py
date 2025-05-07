@@ -8,4 +8,6 @@ urlpatterns = [
     path('api/sheet/<int:sheet_id>/interactive-options/', views.interactive_options_api, name='interactive_options_api'),
     path('student-sheets/', views.StudentSheetsView.as_view(), name='student_sheets'),
     path('no-permission/', views.NoPermissionView.as_view(), name='no_permission'),
+    path('submit-sheet/<int:sheet_id>/', views.submit_sheet, name='submit_sheet'),
+    path('sheet/<int:sheet_id>/submissions/', views.SheetSubmissionsView.as_view(), name='sheet_submissions'),
 ]
