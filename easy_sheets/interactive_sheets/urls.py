@@ -10,4 +10,6 @@ urlpatterns = [
     path('no-permission/', views.NoPermissionView.as_view(), name='no_permission'),
     path('submit-sheet/<int:sheet_id>/', views.submit_sheet, name='submit_sheet'),
     path('sheet/<int:sheet_id>/submissions/', views.SheetSubmissionsView.as_view(), name='sheet_submissions'),
+    path('submission/<int:sheet_id>/', views.view_submission, name='view_submission'),
+    path('api/sheet/<int:sheet_id>/correction/', views.submission_correction_api, name='submission_correction_api'),
 ]

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load submission_filters %}
+
+{% block title %}
+Ver Entrega - {{ sheet.subject }}
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/sheet_detail.css' %}">
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/interactive_sheet.css' %}">
+<link rel="stylesheet" href="{% static 'interactive_sheets/css/sheet_submission.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">{{ sheet.subject }}</h1>
+    <div class="card mt-4">
+        <div class="card-body">
+            <h5 class="card-title">Detalles de la entrega</h5>
+            <p><strong>Subject:</strong> {{ sheet.subject }}</p>
+            <p><strong>Statement:</strong> {{ sheet.statement }}</p>
+            <p><strong>Fecha de entrega:</strong> {{ submission.submission_date|date:"d/m/Y H:i" }}</p>
+            <p><strong>Estado:</strong> {{ submission.get_status_display }}</p>
+            {% if submission.feedback %}
+                <p><strong>Feedback:</strong> {{ submission.feedback }}</p>
+            {% endif %}
+            {% if submission.score %}
+                <p><strong>Calificación:</strong> {{ submission.score }}</p>
+            {% endif %}
+            
+            <div class="interactive-area-container" id="interactive-area-container">
+                <div id="interactive-area" class="interactive-area" data-sheet-id="{{ sheet.id }}">
+                    {% if sheet.base_image %}
+                        <img id="uploaded-image" src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">
+                    {% endif %}
+                    <div id="submission-content">
+                        <!-- Aquí se mostrarán las respuestas del estudiante -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if is_grading %}
+    <div class="card mt-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0">Calificar entrega de {{ student.name }} {{ student.surname_1 }}</h5>
+        </div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ back_url }}">
+                
+                <div class="mb-3">
+                    <label for="score" class="form-label">Calificación:</label>
+                    <input type="number" class="form-control" id="score" name="score" min="0" max="10" step="0.1" value="{{ submission.score|default_if_none:'' }}">
+                    <small class="text-muted">Calificación de 0 a 10</small>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="feedback" class="form-label">Feedback para el estudiante:</label>
+                    <textarea class="form-control" id="feedback" name="feedback" rows="4">{{ submission.feedback|default_if_none:'' }}</textarea>
+                </div>
+                
+                <div class="d-flex justify-content-between">
+                    <a href="{{ back_url }}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-success">Guardar calificación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="mt-4">
+        {% if request.user.role == 'student' %}
+            <a href="{% url 'student_sheets' %}" class="btn btn-secondary">Volver a Mis Fichas</a>
+        {% else %}
+            <a href="{{ back_url }}" class="btn btn-secondary">Volver a la lista de entregas</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'interactive_sheets/js/sheet_submission.js' %}"></script>
+{% endblock %}

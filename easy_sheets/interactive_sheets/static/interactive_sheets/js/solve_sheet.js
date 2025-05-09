@@ -370,11 +370,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
         
         // Verificar si alguno de los puntos ya tiene una conexión
-        const pointId1 = currentlyConnecting.dataset.id;
-        const pointId2 = point.dataset.id;
+        const pointId1 = currentlyConnecting.dataset.optionId;
+        const pointId2 = point.dataset.optionId;
         
         if (isPointConnected(pointId1) || isPointConnected(pointId2)) {
+            console.log('Conexión no permitida entre:', pointId1, pointId2);
             alert('Cada punto solo puede tener una conexión.');
+            
             currentlyConnecting.style.backgroundColor = '#000000';
             currentlyConnecting = null;
             return;
@@ -461,8 +463,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         
         // Guardar la conexión
         connections.push({
-            from: point1.dataset.id,
-            to: point2.dataset.id,
+            from: point1.dataset.optionId,
+            to: point2.dataset.optionId,
             line: line,
             deleteBtn: deleteBtn
         });

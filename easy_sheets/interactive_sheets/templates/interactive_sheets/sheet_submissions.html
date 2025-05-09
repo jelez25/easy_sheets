@@ -1,21 +1,54 @@
 <!-- filepath: c:\Users\Usuario\Desktop\TFG\easy_sheets\easy_sheets\classrooms\templates\classrooms\sheet_submissions.html -->
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Submissions for {{ sheet.subject }} - {{ sheet.statement }}</h2>
-    <ul class="list-group">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Entregas de {{ sheet.subject }} - {{ sheet.statement }}</h2>
+        <a href="{% url 'classroom_detail' sheet.classrooms.first.id %}" class="btn btn-secondary">Volver al Aula</a>
+    </div>
+    
+    <div class="list-group">
         {% for data in students_data %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                    {{ data.student.name }} {{ data.student.surname_1 }}{% if data.student.surname_2 %} {{ data.student.surname_2 }}{% endif %}
+            <div class="list-group-item d-flex align-items-center">
+                <div class="me-3">
+                    {% if data.student.profile_image %}
+                        <img src="{{ data.student.profile_image.url }}" alt="Profile Image" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                    {% else %}
+                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <span class="text-white">{{ data.student.name|first|upper }}</span>
+                        </div>
+                    {% endif %}
                 </div>
-                <span class="badge badge-primary badge-pill">{{ data.status }}</span>
-            </li>
+                
+                <div class="flex-grow-1">
+                    <h6 class="mb-0">{{ data.student.name }} {{ data.student.surname_1 }}{% if data.student.surname_2 %} {{ data.student.surname_2 }}{% endif %}</h6>
+                    <small class="text-muted">{% if data.submission %}Entregado: {{ data.submission.submission_date|date:"d/m/Y H:i" }}{% else %}Sin entregar{% endif %}</small>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                    {% if data.status == "Pendiente" %}
+                        <span class="badge bg-warning text-dark">{{ data.status }}</span>
+                    {% elif data.status == "Enviada" %}
+                        <span class="badge bg-primary me-2">{{ data.status }}</span>
+                        <a href="{% url 'view_submission' sheet.id %}?student_id={{ data.student.id }}" class="btn btn-sm btn-outline-primary">Ver entrega</a>
+                        <a href="{% url 'view_submission' sheet.id %}?student_id={{ data.student.id }}&grade=true" class="btn btn-sm btn-success ms-2">Corregir</a>
+                    {% elif data.status == "Evaluado" %}
+                        <span class="badge bg-success me-2">{{ data.status }}</span>
+                        <a href="{% url 'view_submission' sheet.id %}?student_id={{ data.student.id }}" class="btn btn-sm btn-outline-primary">Ver entrega</a>
+                    {% else %}
+                        <span class="badge bg-secondary me-2">{{ data.status }}</span>
+                    {% endif %}
+                    
+                    {% if data.submission and data.submission.score %}
+                        <span class="ms-2 badge bg-info">{{ data.submission.score }}</span>
+                    {% endif %}
+                </div>
+            </div>
         {% empty %}
-            <p>No students assigned to this sheet.</p>
+            <div class="alert alert-info">No hay estudiantes asignados a esta ficha.</div>
         {% endfor %}
-    </ul>
-    <a href="{% url 'classroom_detail' sheet.classrooms.first.id %}" class="btn btn-secondary mt-3">Back to Classroom</a>
+    </div>
 </div>
 {% endblock %}

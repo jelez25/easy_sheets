@@ -20,7 +20,7 @@
                     {% if submission_status == 'pendiente' %}
                         <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">Resolver</a>
                     {% else %}
-                    <a href="#" class="btn btn-info btn-sm">Ver entrega</a>
+                    <a href="{% url 'view_submission' sheet.id %}" class="btn btn-info btn-sm">Ver entrega</a>
                     {% endif %}
                 {% endwith %}
             </li>

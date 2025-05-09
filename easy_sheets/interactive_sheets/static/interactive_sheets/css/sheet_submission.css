@@ -1,0 +1,64 @@
+.interactive-area-container {
+    width: 100%;
+    position: relative;
+    overflow-x: auto;  /* Permitir scroll horizontal si es necesario */
+    overflow-y: hidden; /* Evitar scroll vertical */
+    margin: 0 auto;
+}
+
+.interactive-area {
+    position: relative;
+    margin: 0 auto;
+    min-height: 600px; /* Altura mínima */
+}
+
+#uploaded-image {
+    display: block;
+    height: 100%;  /* Usar toda la altura disponible */
+    width: auto;   /* Ancho automático para mantener proporción */
+}
+
+.read-only-textbox {
+    position: absolute;
+    border: 1px solid #ccc;
+    padding: 5px;
+    background-color: #f9f9f9;
+    overflow-wrap: break-word;
+}
+
+.read-only-dropdown {
+    position: absolute;
+    border: 1px solid #ccc;
+    padding: 5px;
+    background-color: #f9f9f9;
+}
+
+.read-only-check {
+    position: absolute;
+}
+
+.read-only-draggable {
+    position: absolute;
+    border: 1px solid #000;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+}
+
+.read-only-union-point {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: #000;
+}
+
+.connection-line {
+    position: absolute;
+    height: 2px;
+    background-color: #000;
+    z-index: 5;
+    transform-origin: 0 0;
+}

@@ -164,3 +164,151 @@ class SheetSubmissionsView(LoginRequiredMixin, UserPassesTestMixin, View):
 
     def test_func(self):
         return self.request.user.role == 'teacher'
+
+@login_required
+def view_submission(request, sheet_id):
+    sheet = get_object_or_404(InteractiveSheet, id=sheet_id)
+    
+    # Verificar permisos
+    if request.user.role != 'student' and request.user.role != 'teacher':
+        return HttpResponseForbidden("No tienes permiso para ver esta entrega.")
+    
+    # Obtener la entrega para este estudiante
+    try:
+        if request.user.role == 'student':
+            # Estudiantes solo pueden ver sus propias entregas
+            submission = SheetSubmission.objects.get(sheet=sheet, student=request.user)
+            is_grading = False  # Los estudiantes nunca pueden calificar
+            student = request.user
+        else:
+            # Profesores pueden ver entregas específicas de estudiantes
+            student_id = request.GET.get('student_id')
+            if student_id:
+                submission = SheetSubmission.objects.get(sheet=sheet, student_id=student_id)
+                student = get_object_or_404(CustomUser, id=student_id)
+                # Comprobar si estamos en modo calificación
+                is_grading = request.GET.get('grade') == 'true'
+            else:
+                # Por defecto, ver todas las entregas
+                return redirect('teacher_sheets')
+    except SheetSubmission.DoesNotExist:
+        messages.error(request, "No se encontró la entrega.")
+        return redirect('student_sheets' if request.user.role == 'student' else 'teacher_sheets')
+    
+    # Procesar formulario de calificación si es POST y estamos en modo calificación
+    if request.method == 'POST' and is_grading and request.user.role == 'teacher':
+        # Obtener datos del formulario
+        feedback = request.POST.get('feedback', '')
+        score = request.POST.get('score', None)
+        
+        # Actualizar la entrega
+        submission.feedback = feedback
+        
+        # Validar y convertir calificación
+        try:
+            if score:
+                score_value = float(score)
+                # Asegurarse de que la calificación esté en el rango correcto
+                if 0 <= score_value <= 10:
+                    submission.score = score_value
+                else:
+                    messages.error(request, "La calificación debe estar entre 0 y 10.")
+            else:
+                submission.score = None
+        except ValueError:
+            messages.error(request, "La calificación debe ser un número válido.")
+        
+        # Cambiar estado a evaluado
+        submission.status = 'corregida'
+        submission.save()
+        
+        messages.success(request, "Entrega calificada correctamente.")
+        
+        # Redirigir a la lista de entregas con parámetro para no mostrar grade=true
+        next_url = request.POST.get('next', reverse('sheet_submissions', kwargs={'sheet_id': sheet_id}))
+        return redirect(next_url)
+    
+    # Convertir las respuestas almacenadas a formato JSON para la plantilla
+    student_answers = submission.answers
+    
+    context = {
+        'sheet': sheet,
+        'submission': submission,
+        'student_answers': student_answers,
+        'is_view_only': not is_grading,  # Solo lectura si no estamos calificando
+        'is_grading': is_grading,  # Indicar si estamos en modo calificación
+        'student': student,
+        'back_url': request.GET.get('next', reverse('sheet_submissions', kwargs={'sheet_id': sheet_id}) if request.user.role == 'teacher' else reverse('student_sheets'))
+    }
+    
+    return render(request, 'interactive_sheets/view_submission.html', context)
+
+@login_required
+def submission_correction_api(request, sheet_id):
+    """
+    API para obtener datos necesarios para corregir una entrega.
+    Devuelve tanto las opciones interactivas como las respuestas del estudiante.
+    """
+    # Verificar que el usuario sea profesor
+    if request.user.role != 'teacher':
+        return JsonResponse({'error': 'No tienes permiso para acceder a esta información'}, status=403)
+    
+    sheet = get_object_or_404(InteractiveSheet, id=sheet_id)
+    student_id = request.GET.get('student_id')
+    
+    if not student_id:
+        return JsonResponse({'error': 'Se requiere ID de estudiante'}, status=400)
+    
+    # Obtener opciones interactivas
+    try:
+        interactive_options = json.loads(sheet.interactive_options) if sheet.interactive_options else []
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Error en formato de opciones interactivas'}, status=500)
+    
+    # Obtener entrega del estudiante
+    try:
+        submission = SheetSubmission.objects.get(sheet=sheet, student_id=student_id)
+        student = get_object_or_404(CustomUser, id=student_id)
+        
+        # Obtener las respuestas
+        student_answers = {}
+        if submission.answers:
+            try:
+                if isinstance(submission.answers, str):
+                    student_answers = json.loads(submission.answers)
+                else:
+                    student_answers = submission.answers
+            except json.JSONDecodeError:
+                return JsonResponse({'error': 'Error en formato de respuestas'}, status=500)
+        
+        # Construir respuesta completa
+        response_data = {
+            'interactive_options': interactive_options,
+            'student_answers': student_answers,
+            'submission': {
+                'id': submission.id,
+                'status': submission.status,
+                'status_display': submission.get_status_display(),
+                'submission_date': submission.submission_date.isoformat() if submission.submission_date else None,
+                'score': submission.score,
+                'feedback': submission.feedback
+            },
+            'student': {
+                'id': student.id,
+                'name': student.name,
+                'surname': student.surname_1,
+                'surname2': student.surname_2,
+                'email': student.email
+            }
+        }
+        
+        return JsonResponse(response_data)
+        
+    except SheetSubmission.DoesNotExist:
+        return JsonResponse({
+            'interactive_options': interactive_options,
+            'error': 'No se encontró entrega para este estudiante',
+            'student': {
+                'id': student_id
+            }
+        })
