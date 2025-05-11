@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Crear Cuaderno</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="name" class="form-label">Nombre del Cuaderno:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Crear</button>
+        <a href="{% url 'list_notebooks' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

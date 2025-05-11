@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Detalle del Cuaderno: {{ notebook.name }}</h2>
+    <p><strong>Creado por:</strong> {{ notebook.creator }}</p>
+    <p><strong>Fecha de Creación:</strong> {{ notebook.created_at }}</p>
+    <p><strong>Última Actualización:</strong> {{ notebook.updated_at }}</p>
+
+    <h3>Fichas en el Cuaderno</h3>
+    <ul class="list-group">
+        {% for sheet in notebook.sheets.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ sheet.subject }}
+                <a href="{% url 'sheet_detail' sheet.id %}" class="btn btn-info btn-sm">Ver Detalle</a>
+            </li>
+        {% empty %}
+            <p>No hay fichas en este cuaderno.</p>
+        {% endfor %}
+    </ul>
+
+    <div class="mt-4">
+        <a href="{% url 'edit_notebook' notebook.id %}" class="btn btn-warning">Editar Cuaderno</a>
+        <a href="{% url 'list_notebooks' %}" class="btn btn-secondary">Volver a la Lista</a>
+    </div>
+</div>
+{% endblock %}

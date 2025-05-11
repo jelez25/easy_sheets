@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Mis Cuadernos</h2>
+    <a href="{% url 'create_notebook' %}" class="btn btn-primary mb-3">Crear Cuaderno</a>
+    <ul class="list-group">
+        {% for notebook in notebooks %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ notebook.name }}
+                <div>
+                    <a href="{% url 'notebook_detail' notebook.id %}" class="btn btn-sm btn-info">Ver Detalle</a>
+                    <form method="post" action="{% url 'delete_notebook' notebook.id %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-danger">Eliminar</button>
+                    </form>
+                </div>
+            </li>
+        {% empty %}
+            <p class="text-center">No tienes cuadernos creados.</p>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

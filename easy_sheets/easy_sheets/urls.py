@@ -20,7 +20,7 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from easy_sheets.views import home_page
-from accounts.views import SignUpView, ProfileView, ProfileUpdate, EmailUpdate, CustomPasswordChangeView
+from accounts.views import SignUpView
 from django.contrib.auth.views import LogoutView, LoginView
 
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
     path('profile/', include('accounts.urls')),
     path('sheets/', include('interactive_sheets.urls')),
     path('classrooms/', include('classrooms.urls')),  # Incluir las rutas de classrooms
+    path('notebooks/', include('notebooks.urls')),
 ]
 
 

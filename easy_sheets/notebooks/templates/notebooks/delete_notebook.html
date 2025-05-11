@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Eliminar Cuaderno</h2>
+    <p>¿Estás seguro de que deseas eliminar el cuaderno "{{ notebook.name }}"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Eliminar</button>
+        <a href="{% url 'list_notebooks' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

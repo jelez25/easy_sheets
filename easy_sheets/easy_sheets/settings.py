@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'accounts',
     'interactive_sheets',
     'classrooms',
+    'notebooks',
 ]
 
 MIDDLEWARE = [

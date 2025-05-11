@@ -193,7 +193,7 @@ class JoinClassroomView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, 'classrooms/join_classroom.html')
 
-class  ClassroomEditView(LoginRequiredMixin, DetailView):
+class ClassroomEditView(LoginRequiredMixin, DetailView):
     model = Classroom
     template_name = 'classrooms/edit_classroom.html'
     context_object_name = 'classroom'
