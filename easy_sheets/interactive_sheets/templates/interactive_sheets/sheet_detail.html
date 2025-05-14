@@ -31,7 +31,7 @@ Sheet Details
                         {% endfor %}
                     </div>
                 {% endif %}
-                <div id="interactive-area" class="interactive-area" data-sheet-id="{{ sheet.id }}">
+                <div id="interactive-area" class="interactive-area" data-sheet-id="{{ sheet.id }}" data-subject = "{{ sheet.subject|escapejs }}" data-statement="{{ sheet.statement|escapejs }}">
                     {% if sheet.base_image %}
                         <img id="uploaded-image" src="{{ sheet.base_image.url }}" alt="Base Image" class="img-fluid">
                     {% endif %}
@@ -43,6 +43,7 @@ Sheet Details
         {% if user.role == 'teacher' %}
             <a href="{% url 'teacher_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
             <a href="#" class="btn btn-warning">Edit</a>
+            <button id="export-pdf" class="btn btn-outline-primary">Exportar área interactiva a PDF</button>
         {% elif user.role == 'student' %}
             <a href="{% url 'student_sheets' %}" class="btn btn-secondary">Back to My Sheets</a>
             <button id="submit-sheet-btn" class="btn btn-primary">Enviar Ficha</button>
@@ -78,9 +79,14 @@ Sheet Details
 </div>
 {% endblock %}
 {% block extra_js %}
+
 {% if user.role == 'student' %}
 <script src="{% static 'interactive_sheets/js/solve_sheet.js' %}"></script>
 {% else %}
 <script src="{% static 'interactive_sheets/js/sheet_detail.js' %}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="{% static 'interactive_sheets/js/export_pdf.js' %}"></script>
 {% endif %}
 {% endblock %}

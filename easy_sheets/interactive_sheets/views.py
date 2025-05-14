@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.http import HttpResponseForbidden, JsonResponse
+from django.http import HttpResponseForbidden, JsonResponse, HttpResponse
 from django.views.generic.edit import CreateView, UpdateView
 from .forms import InteractiveSheetForm
 from .models import InteractiveSheet, SheetSubmission
@@ -9,6 +9,8 @@ from django.views.decorators.csrf import csrf_exempt
 from accounts.models import CustomUser
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.template.loader import render_to_string
+from weasyprint import HTML
 import json
 from django.views import View
 from django.urls import reverse
