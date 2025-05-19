@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block messages %}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Conversación</h2>
+    <div class="card mb-4">
+        <div class="card-header d-flex align-items-center">
+            <img src="{{ other_participant_avatar }}" 
+                 alt="Foto de perfil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+            <h5 class="mb-0">
+                {{ other_participant.name }} 
+                {{ other_participant.surname_1 }}
+                {% if other_participant.surname_2 %}
+                    {{ other_participant.surname_2 }}
+                {% endif %}
+            </h5>
+        </div>
+        <div class="card-body" id="chat-messages" style="max-height: 400px; overflow-y: auto;" 
+             data-thread-id="{{ thread.id }}" 
+             data-user-name="{{ request.user.name }} {{ request.user.surname_1 }}">
+            {% for message in messages %}
+                <div class="mb-2 d-flex {% if message.sender == request.user %}justify-content-end{% else %}justify-content-start{% endif %}">
+                    <div class="p-2 {% if message.sender == request.user %}bg-warning text-dark{% else %}bg-light text-dark{% endif %} rounded">
+                        <span class="fw-bold">{{ message.sender.name }}:</span>
+                        <span>{{ message.content }}</span>
+                        <small class="text-muted d-block">{{ message.formatted_timestamp }}</small>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="text-center text-muted">No hay mensajes en este hilo.</p>
+            {% endfor %}
+        </div>
+    </div>
+    <form id="chat-form" class="d-flex mb-3">
+        {% csrf_token %}
+        <input id="chat-message-input" type="text" name="content" class="form-control me-2" placeholder="Escribe un mensaje..." autocomplete="off" required>
+        <button id="chat-submit-button" type="submit" class="btn btn-warning" disabled>Enviar</button>
+    </form>
+    <a href="{% url 'messaging:thread_list' %}" class="btn btn-secondary">Volver a conversaciones</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'messaging/js/messaging.js' %}"></script>
+{% endblock %}

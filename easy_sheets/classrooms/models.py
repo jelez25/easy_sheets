@@ -17,12 +17,6 @@ class Classroom(models.Model):
         related_name="classrooms",
         verbose_name="Profesor"
     )
-    students = models.ManyToManyField(
-        settings.AUTH_USER_MODEL,
-        related_name="enrolled_classrooms",
-        blank=True,
-        verbose_name="Alumnos"
-    )
     sheets = models.ManyToManyField(
         InteractiveSheet,
         related_name="classrooms",

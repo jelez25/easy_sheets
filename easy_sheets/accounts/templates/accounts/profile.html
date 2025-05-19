@@ -54,6 +54,7 @@ Profile
     <div class="text-center mt-3">
         <a href="{% url 'list_notebooks' %}" class="btn btn-warning">Ver Mis Cuadernos</a>
     </div>
+    
     {% endif %}
     <!-- Options for Students -->
     {% if user.role == 'student' %}
@@ -62,5 +63,8 @@ Profile
         <a href="{% url 'student_classroom' %}" class="btn btn-info btn-block mt-3">Ver Mi Clase</a>
     </div>
     {% endif %}
+    <div class="text-center mt-3">
+        <a href="{% url 'messaging:thread_list' %}" class="btn btn-secondary">Ver Conversaciones</a>
+    </div>
 </div>
 {% endblock %}

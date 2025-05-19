@@ -53,15 +53,16 @@ class ClassroomDetailView(LoginRequiredMixin, DetailView):
     model = Classroom
     template_name = 'classrooms/classroom_detail.html'
     context_object_name = 'classroom'
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         classroom = self.get_object()
-        # Filtrar estudiantes disponibles
+        # Filtrar estudiantes disponibles (sin clase asignada)
         available_students = CustomUser.objects.filter(
             role='student',
-            school=self.request.user.school
-        ).exclude(enrolled_classrooms=classroom)
+            school=self.request.user.school,
+            classroom__isnull=True
+        )
         # Filtrar fichas disponibles
         available_sheets = InteractiveSheet.objects.exclude(classrooms=classroom)
         context['available_students'] = available_students
@@ -76,15 +77,32 @@ def add_student(request, pk):
 
     classroom = get_object_or_404(Classroom, pk=pk)
 
-    # Filtrar estudiantes del mismo colegio que el profesor
-    students = CustomUser.objects.filter(role='student', school=request.user.school).exclude(enrolled_classrooms=classroom)
+    # Filtrar estudiantes del mismo colegio que el profesor que no estén en ninguna clase
+    students = CustomUser.objects.filter(
+        role='student', 
+        school=request.user.school,
+        classroom__isnull=True
+    )
 
     if request.method == 'POST':
         selected_students_ids = request.POST.getlist('students')  # Obtener los IDs seleccionados
-        selected_students = CustomUser.objects.filter(id__in=selected_students_ids, role='student', school=request.user.school)
-        classroom.students.add(*selected_students)
-        messages.success(request, "Estudiantes añadidos correctamente.")  # Añadir mensaje de éxito
-        return redirect('edit_classroom', pk=classroom.pk)  # Redirigir después de procesar el formulario
+        selected_students = CustomUser.objects.filter(
+            id__in=selected_students_ids, 
+            role='student', 
+            school=request.user.school,
+            classroom__isnull=True
+        )
+        # Actualizar el aula de cada estudiante
+        for student in selected_students:
+            student.classroom = classroom
+            student.save()
+            
+            # Crear SheetSubmission para el estudiante con todas las fichas de la clase
+            for sheet in classroom.sheets.all():
+                SheetSubmission.objects.get_or_create(student=student, sheet=sheet)
+                
+        messages.success(request, "Estudiantes añadidos correctamente.")
+        return redirect('edit_classroom', pk=classroom.pk)
 
     return render(request, 'add_students.html', {'students': students, 'classroom': classroom})
 
@@ -96,7 +114,16 @@ def remove_student(request, pk, student_id):
 
     classroom = get_object_or_404(Classroom, pk=pk)
     student = get_object_or_404(CustomUser, pk=student_id)
-    classroom.students.remove(student)
+    
+    # Solo remover si el estudiante está en esta clase
+    if student.classroom == classroom:
+        # Eliminar todas las entregas pendientes del estudiante para las fichas de esta clase
+        SheetSubmission.objects.filter(student=student, sheet__in=classroom.sheets.all()).delete()
+        
+        # Remover al estudiante de la clase
+        student.classroom = None
+        student.save()
+    
     return redirect('edit_classroom', pk=pk)
 
 @login_required
@@ -163,10 +190,7 @@ class StudentClassroomView(LoginRequiredMixin, DetailView):
 
     def get_object(self):
         # Obtener la clase a la que el estudiante está asignado
-        try:
-            return Classroom.objects.get(students=self.request.user)
-        except Classroom.DoesNotExist:
-            return None
+        return self.request.user.classroom
 
     def get(self, request, *args, **kwargs):
         classroom = self.get_object()
@@ -174,7 +198,7 @@ class StudentClassroomView(LoginRequiredMixin, DetailView):
             return super().get(request, *args, **kwargs)
         else:
             # Si el estudiante no está asignado a ninguna clase, redirigir a una página para unirse
-            return redirect('join_classroom')  # Cambia 'join_classroom' según tu configuración
+            return redirect('join_classroom')
 
 class JoinClassroomView(LoginRequiredMixin, View):
     def post(self, request):
@@ -182,7 +206,21 @@ class JoinClassroomView(LoginRequiredMixin, View):
         try:
             # Filtrar la clase por código y colegio del estudiante
             classroom = Classroom.objects.get(class_code=class_code, teacher__school=request.user.school)
-            classroom.students.add(request.user)
+            
+            # Verificar que el estudiante no esté ya en una clase
+            if request.user.classroom is not None:
+                return render(request, 'classrooms/join_classroom.html', {
+                    'error': 'Ya estás asignado a una clase. Debes salir de tu clase actual antes de unirte a otra.'
+                })
+                
+            # Asignar el estudiante a la clase
+            request.user.classroom = classroom
+            request.user.save()
+            
+            # Crear SheetSubmission para todas las fichas de la clase
+            for sheet in classroom.sheets.all():
+                SheetSubmission.objects.get_or_create(student=request.user, sheet=sheet)
+            
             return HttpResponseRedirect(reverse('student_classroom'))
         except Classroom.DoesNotExist:
             # Mostrar un mensaje de error si la clase no existe o no pertenece al mismo colegio
@@ -201,11 +239,12 @@ class ClassroomEditView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         classroom = self.get_object()
-        # Filtrar estudiantes disponibles
+        # Filtrar estudiantes disponibles (sin clase asignada)
         available_students = CustomUser.objects.filter(
             role='student',
-            school=self.request.user.school
-        ).exclude(enrolled_classrooms=classroom)
+            school=self.request.user.school,
+            classroom__isnull=True
+        )
         # Filtrar fichas disponibles
         available_sheets = InteractiveSheet.objects.exclude(classrooms=classroom)
         context['available_students'] = available_students

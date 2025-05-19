@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Mis Conversaciones</h2>
+    <ul class="list-group mb-4">
+        {% for thread_data in threads %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <img src="{{ thread_data.other_participant_avatar }}" 
+                         alt="Foto de perfil" class="rounded-circle me-3" style="width: 50px; height: 50px;">
+                    <div>
+                        <h5 class="mb-1">
+                            {{ thread_data.other_participant.name }} {{ thread_data.other_participant.surname_1 }}
+                            {% if thread_data.has_unread %}
+                                <span class="badge bg-danger ms-2">Nuevo</span>
+                            {% endif %}
+                        </h5>
+                        {% if thread_data.other_participant.surname_2 %}
+                            <p class="mb-0">{{ thread_data.other_participant.surname_2 }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'messaging:thread_detail' thread_data.thread.id %}" class="btn btn-primary btn-sm">Ver conversación</a>
+            </li>
+        {% empty %}
+            <li class="list-group-item text-center">No tienes conversaciones activas.</li>
+        {% endfor %}
+    </ul>
+    <h4>Iniciar nueva conversación</h4>
+    <form id="start-thread-form" method="get" action="">
+        <div class="mb-3">
+            <select id="user-select" name="user_id" class="form-select" required>                <option value="">Selecciona un usuario...</option>                {% if request.user.role == 'student' and request.user.classroom %}
+                    <!-- Mostrar el profesor si el usuario es estudiante -->
+                    <option value="{{ request.user.classroom.teacher.id }}">
+                        Profesor: {{ request.user.classroom.teacher.name }} {{ request.user.classroom.teacher.surname_1 }}{% if request.user.classroom.teacher.surname_2 %} {{ request.user.classroom.teacher.surname_2 }}{% endif %}
+                    </option>
+                    <!-- Mostrar compañeros de clase -->
+                    {% for classmate in request.user.classroom.students.all %}
+                        {% if classmate != request.user %}
+                            <option value="{{ classmate.id }}">{{ classmate.name }} {{ classmate.surname_1 }}{% if classmate.surname_2 %} {{ classmate.surname_2 }}{% endif %}</option>
+                        {% endif %}
+                    {% endfor %}
+                {% elif request.user.role == 'teacher' %}
+                    <!-- Mostrar estudiantes de todas las clases que enseña el profesor -->
+                    {% for classroom in request.user.classrooms.all %}
+                        {% for student in classroom.students.all %}
+                            <option value="{{ student.id }}">
+                                {{ student.name }} {{ student.surname_1 }}{% if student.surname_2 %} {{ student.surname_2 }}{% endif %}
+                                ({{ classroom.name }})
+                            </option>
+                        {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Iniciar conversación</button>
+    </form>
+    <script>    document.getElementById('start-thread-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        var userId = document.getElementById('user-select').value;
+        if (userId) {
+            window.location.href = "{% url 'messaging:start_thread' 0 %}".replace('0', userId);
+        }
+    });
+    </script>
+</div>
+{% endblock %}

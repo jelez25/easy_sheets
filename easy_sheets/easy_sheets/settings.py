@@ -42,10 +42,14 @@ INSTALLED_APPS = [
     'interactive_sheets',
     'classrooms',
     'notebooks',
+    'messaging',
+    'channels',  # Add channels
+    'channels_redis',  # Add channels_redis
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Para servir archivos estáticos
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -72,6 +76,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'easy_sheets.wsgi.application'
+ASGI_APPLICATION = 'easy_sheets.asgi.application'
 
 
 # Database
@@ -109,7 +114,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Madrid'
 
 USE_I18N = True
 
@@ -121,8 +126,19 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),  # Asegúrate de que esta ruta sea correcta
+    os.path.join(BASE_DIR, 'static'),
+    os.path.join(BASE_DIR, 'accounts', 'static'),
+    os.path.join(BASE_DIR, 'interactive_sheets', 'static'),
+    os.path.join(BASE_DIR, 'notebooks', 'static'),
+    os.path.join(BASE_DIR, 'messaging', 'static'),
+    os.path.join(BASE_DIR, 'classrooms', 'static'),
 ]
+
+# Configuración de archivos estáticos para desarrollo
+if DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    WHITENOISE_AUTOREFRESH = True
+    WHITENOISE_USE_FINDERS = True
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -141,4 +157,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MESSAGE_TAGS = {
     messages.SUCCESS: 'alert-success',
     messages.ERROR: 'alert-danger',
+}
+
+# Channel layer configuration for WebSocket support
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
 }
